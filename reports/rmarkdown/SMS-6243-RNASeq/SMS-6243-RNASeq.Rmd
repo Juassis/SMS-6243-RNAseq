@@ -1,0 +1,350 @@
+---
+title: "NBIS Report"
+subtitle: '`r format(Sys.Date(),format="%d-%b-%Y")`'
+output:
+  rmarkdown::html_document:
+    toc: true
+    toc_float:
+      collapsed: true
+      smooth_scroll: true
+      print: false
+    toc_depth: 4
+    number_sections: true
+    highlight: tango
+    df_print: paged
+    code_folding: "show"
+    self_contained: true
+    keep_md: false
+    encoding: 'UTF-8'
+    css: "assets/report.css"
+---
+
+```{r,child="assets/_header-lab.Rmd"}
+```
+
+<!-- ----------------------- Do not edit above this ----------------------- -->
+
+```{r,echo=FALSE,include=FALSE}
+# CUSTOM VARIABLES
+
+# custom ggplot theme
+theme_report_h <- function (base_size=12,base_family=NULL,colour="grey60") {
+  theme_bw(base_size=base_size,base_family=base_family) %+replace%
+    theme(
+      panel.border=element_blank(),
+      panel.grid.minor=element_blank(),
+      panel.grid.major.x=element_blank(),
+      legend.position="top",
+      legend.direction="horizontal",
+      legend.justification="center",
+      strip.background=element_blank(),
+      axis.ticks.y=element_blank(),
+      axis.ticks.x=element_line(colour=colour),
+      plot.caption=element_text(hjust=0,colour=colour,size=10),
+      plot.title=element_text(colour=colour),
+      plot.subtitle=element_text(colour=colour)
+    )
+}
+
+# custom ggplot theme
+theme_report <- theme_report_v <- function (base_size=12,base_family=NULL,colour="grey60") {
+  theme_bw(base_size=base_size,base_family=base_family) %+replace%
+    theme(
+      panel.border=element_blank(),
+      panel.grid.minor=element_blank(),
+      panel.grid.major.x=element_blank(),
+      legend.position="right",
+      legend.direction="vertical",
+      legend.justification="center",
+      strip.background=element_blank(),
+      axis.ticks.y=element_blank(),
+      axis.ticks.x=element_line(colour=colour),
+      plot.caption=element_text(hjust=0,colour=colour,size=10),
+      plot.title=element_text(colour=colour),
+      plot.subtitle=element_text(colour=colour)
+    )
+}
+
+# custom ggplot theme
+theme_simple_h <- function (base_size=12,base_family=NULL,colour="grey60") {
+  theme_bw(base_size=base_size,base_family=base_family) %+replace%
+    theme(
+      panel.border=element_blank(),
+      panel.grid=element_blank(),
+      legend.justification="center",
+      legend.position="top",
+      legend.direction="horizontal",
+      strip.background=element_blank(),
+      axis.ticks=element_blank(),
+      axis.text=element_blank(),
+      axis.title=element_blank(),
+      plot.caption=element_text(hjust=0,colour=colour,size=10),
+      plot.title=element_text(colour=colour),
+      plot.subtitle=element_text(colour=colour)
+    )
+}
+
+# custom ggplot theme
+theme_simple_v <- function (base_size=12,base_family=NULL,colour="grey60") {
+  theme_bw(base_size=base_size,base_family=base_family) %+replace%
+    theme(
+      panel.border=element_blank(),
+      panel.grid=element_blank(),
+      legend.justification="center",
+      legend.position="right",
+      legend.direction="vertical",
+      strip.background=element_blank(),
+      axis.ticks=element_blank(),
+      axis.text=element_blank(),
+      axis.title=element_blank(),
+      plot.caption=element_text(hjust=0,colour=colour,size=10),
+      plot.title=element_text(colour=colour),
+      plot.subtitle=element_text(colour=colour)
+    )
+}
+
+#colours
+col_sll_green <- "#95C11E"
+col_sll_blue <- "#0093BD"
+col_sll_orange <- "#EF7C00"
+col_sll_green_light <- "#f4f8e8"
+col_sll_blue_light <- "#e5f4f8"
+col_sll_orange_light <- "#fdf1e5"
+
+# project variables
+rep_nbis_id <- "SMS-6243"
+rep_report_version <- "1.0"
+rep_request <- "Ganesh Mohite"
+rep_request_email <- "ganesh.mohite@liu.se"
+rep_pi <- "Per Hammarström"
+rep_pi_email <- "per.hammarstrom@liu.se"
+rep_org <- "Linköping University"
+rep_nbis <- "Juliana Assis"
+rep_nbis_email <- "juliana.assis@nbis.se"
+```
+
+<br>
+
+::: boxy
+__NBIS ID:__ `r rep_nbis_id`   
+__Report Version:__ `r rep_report_version`  
+__Request by:__ `r paste0(rep_request," (",rep_request_email,")")`  
+__Principal Investigator:__ `r paste0(rep_pi," (",rep_pi_email,")")`   
+__Organisation:__ `r rep_org`  
+__NBIS Staff:__ `r paste0(rep_nbis," (",rep_nbis_email,")")`  
+:::
+
+<br>
+
+# Setup
+
+```{r message=FALSE, warning=FALSE}
+## LIBRARIES
+library("devtools")
+library("dplyr")
+library("ggplot2")
+library("tidyr")
+library("DECIPHER")
+library("gplots")
+library("gridExtra")
+library("grid")
+library("ggpubr")
+library("reshape2")
+library("reshape")
+library("ggrepel")
+library("ggh4x")
+library("RColorBrewer")
+library("tidyverse")
+library("DESeq2") # Bioconductor
+library('ggfortify')
+library("AnnotationDbi")
+library("EnsDb.Hsapiens.v86")
+library("FactoMineR")
+library("factoextra")
+library("PCAtools")
+library("Rqc")
+library("gt")
+library("clusterProfiler")
+library("rnaseqGene")
+```
+
+# Version
+
+# Support Request  
+
+Request sent by the user.
+
+# Data  
+
+* Type of data 
+48 Samples: bulk RNASeq
+
+* Data location
+/proj/snic2021-23-376/delivery05805
+
+* Uppmax project ID
+
+SNIC 2022/23-315		SNIC Small Storage	
+SNIC 2022/22-598	    SNIC Small Compute
+
+* Reference data used
+Drosophila_melanogaster-Ensembl-BDGP6
+
+# Tools
+nfcore-rnaseq
+
+
+```{r}
+data <- read.table("/Users/juliana/Documents/GitHub/SMS-6243-RNAseq/results/00-Reports/P.Hammarstrom_22_01_sample_info.txt", header=T, row.names=1, check.names=T, sep="\t")
+
+head(data)
+```
+
+# Workflow
+```{r, message=FALSE, warning=FALSE, include=FALSE}
+# Set up data
+# Load reads
+exp <- readRDS("/Users/juliana/Documents/GitHub/SMS-6243-RNAseq/results/salmon.merged.gene_counts_length_scaled.rds")
+
+exp2 <- readRDS("/Users/juliana/Documents/GitHub/SMS-6243-RNAseq/results/salmon.merged.gene_counts_length_scaled.rds")
+assay(exp, 1) <- round(data.matrix(assay(exp, 1)))
+assay(exp, 2) <- NULL
+
+# Add metadata
+exp$Day <- as.factor(c("1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5"))
+
+exp$Group <- c("nSyb","nSyb","nSyb","nSyb","nSyb","nSyb","nSyb","nSyb","nSyb","nSyb","nSyb","Repo","Repo","Repo","Repo","Repo","Repo","Repo","Repo","Repo","Repo","Repo","Repo","nSyb","nSyb","nSyb","nSyb","nSyb","nSyb","nSyb","nSyb","nSyb","nSyb","nSyb","nSyb","Repo","Repo","Repo","Repo","Repo","Repo","Repo","Repo","Repo","Repo","Repo","Repo")
+
+exp$Group2 <- c("Abeta","Abeta","Abeta","Abeta","Abeta","Abeta","Empty","Empty","Empty","Empty","Empty","Abeta","Abeta","Abeta","Abeta","Abeta","Abeta","Empty","Empty","Empty","Empty","Empty","Empty","Abeta","Abeta","Abeta","Abeta","Abeta","Abeta","Empty","Empty","Empty","Empty","Empty","Empty","Abeta","Abeta","Abeta","Abeta","Abeta","Abeta","Empty","Empty","Empty","Empty","Empty","Empty")
+
+exp$Gender <- c("Females","Females","Females","Males","Males","Males","Females","Females","Males","Males","Males","Females","Females","Females","Males","Males","Males","Females","Females","Females","Males","Males","Males","Females","Females","Females","Males","Males","Males","Females","Females","Females","Males","Males","Males","Females","Females","Females","Males","Males","Males","Females","Females","Females","Males","Males","Males")
+
+exp$Replicates <- as.factor (c("1","2","3","1","2","3","2","3","1","2","3","1","2","3","1","2","3","1","2","3","1","2","3","1","2","3","1","2","3","1","2","3","1","2","3","1","2","3","1","2","3","1","2","3","1","2","3"))
+
+```
+
+
+In the next step, the reads were mapped to the Drosophila_melanogaster-Ensembl-BDGP6 and counts per gene were collected. This high-dimensional count data can - after normalization - be visualized in two dimensions in a Principal Component analysis (PCA). Using [PCA](http://setosa.io/ev/principal-component-analysis), we examine the structure of the data by projecting the samples on a two-dimensional graph using the two first principal components that explain the most variation between those samples. In Figure \@ref(fig:pca), each point corresponds to a sample plotted on PC1 and PC2. The plot can be used to examine the samples for outliers, sample swaps and other relationships. When normalization successfully removed technical artefacts, the relative distances should be biologically interpretable.
+
+
+
+```{r pca, fig.cap="PCA plot of the first 2 principal components. Calculated using the 500 most variable genes.", fig.width=12, fig.height=6, message=FALSE, warning=FALSE, fig.path='PCA/', dev=c('png', 'pdf')}
+# PCA
+
+#head(assay(exp, "counts"))
+shapiro.test(as.numeric(assay(exp[1,])))
+ggpubr::ggqqplot(as.numeric(assay(exp[1,])))
+
+counts <- assay(exp, "counts")
+colData <- (as.data.frame(exp@colData))
+
+dds <- DESeqDataSetFromMatrix(countData = round(counts),
+                              colData = colData,
+                              design=~Replicates)
+
+data_norm <- vst(assay(dds))
+#dds <- DESeq(dds)
+var_genes <- apply(data_norm, 1, var)
+
+# Get the gene names for the top 500 most variable genes
+select_var <- names(sort(var_genes, decreasing=TRUE))[1:500]
+data_norm_var <- data_norm[select_var,]
+
+# perform PCA
+res.pca <- PCA(t(data_norm_var), scale.unit = FALSE, graph = FALSE)
+# visualize
+a <- fviz_pca_ind(res.pca)
+cowplot::plot_grid(a)
+a
+```
+
+By coloring the samples according to their phenotype (Gender in this case), the structure underlying the data in the PCA plot can become more clear. From Figure \@ref(fig:Gender), it is clear the major phenotype driving the separation along PC1 is the group of the samples. 
+
+To visually show the correlation of these genes with the PCs, a biplot is shown as well. In the biplot, these 20 most important genes are overlayed as arrows on the PCA plot. From the position and length of these arrows, one can assess the strength and contribution of specific genes to the principal components. Reassuringly, three yolk proteins (yp1-3) contribute strongly to PC1. The arrow point in the same direction as the PC1 axis so the correlation is positive. This means that samples with higher PC1 values have higher expression. 
+
+
+```{r groups, fig.width=12, fig.height=12, message=FALSE, warning=FALSE, fig.cap="group is distributed along PC1. (A) PCA plot with samples coloured according to groups (B) Top 20 genes contributing to PC1. (C) Biplot showing the correlations among the top 20 genes and the PCs."}
+b <- fviz_pca_ind(res.pca, 
+                repel = TRUE,
+                habillage =factor(colData(exp)[,"Gender"]),
+                invisible="quali")
+#ggsave("./PCA/GenderPCA.pdf", b)
+c <- fviz_contrib(res.pca, choice = "var", axes = 1, top = 20)
+#ggsave("./PCA/Barplot_Top20_PC1.pdf", c)
+e <- fviz_pca_biplot(res.pca, 
+                repel = TRUE,
+                select.var =list(name = rownames(head(res.pca$var$contrib[order(res.pca$var$contrib[,1], decreasing = TRUE),], 20))),
+                invisible="quali")
+#ggsave("./PCA/Biplot_Top20_PC1.pdf", e)
+bottom_row <- cowplot::plot_grid(c,e, labels = c("B", "C"))
+cowplot::plot_grid(b,bottom_row, labels = c("A", ""), ncol = 1)
+```
+
+
+# Summary
+
+Short summary of the work.  
+
+# Further Work  
+
+Further steps to be taken (if needed).
+
+# References
+
+Relevant references for methods, tools etc.
+
+# Deliverables  
+
+Files delivered to the user with descriptions.
+
+## Directory  
+
+
+# Timeline
+
+# Practical Info  
+## Data responsibility
+
+The responsibility for data archiving lies with the PI of the project. We do not offer long-term storage or retrieval of data.
+
++ __NBIS & Uppnex: __ We kindly ask that you remove the files from UPPMAX/UPPNEX. The main storage at UPPNEX is optimized for high-speed and parallel access, which makes it expensive and not the right place for longer time archiving. Please consider others by not taking up the expensive space. Please note that UPPMAX is a resource separate from the Bioinformatics Platform, administered by the Swedish National Infrastructure for Computing (SNIC) and SNIC-specifc project rules apply to all projects hosted at UPPMAX.   
++ __Sensitive data :__ Please note that special considerations may apply to the human-derived legally considered sensitive personal data. These should be handled according to specific laws and regulations as outlined e.g. [here](http://nbis.se/support/human-data.html).  
++ __Long-term backup :__ We recommend asking your local IT for support with long-term data archiving. Also a newly established [Data Office](https://www.scilifelab.se/data/) at SciLifeLab may be of help to discuss other options.  
+
+## Acknowledgments
+
+If you are presenting the results in a paper, at a workshop or conference, we kindly ask you to acknowledge us.
+
++ __NBIS staff__ are encouraged to be co-authors when this is merited in accordance to the ethical recommendations for authorship, e.g. [ICMJE recommendations](http://www.icmje.org/recommendations/browse/roles-and-responsibilities/defining-the-role-of-authors-and-contributors.html). If applicable, please include __Name, Surname, National Bioinformatics Infrastructure Sweden, Science for Life Laboratory, Further Affliations__, as co-author. In other cases, NBIS would be grateful if support by us is acknowledged in publications according to this example:
+
+> "Support by NBIS (National Bioinformatics Infrastructure Sweden) is gratefully acknowledged."
+
++ __UPPMAX__ kindly asks you to [acknowledge UPPMAX and SNIC](https://www.uppmax.uu.se/support/faq/general-miscellaneous-faq/acknowledging-uppmax--snic--and-uppnex/). If applicable, please add:
+
+> "The computations were performed on resources provided by SNIC through Uppsala Multidisciplinary Center for Advanced Computational Science (UPPMAX) under Project SNIC XXXX."
+
++ __NGI :__ For publications based on data from NGI Sweden, NGI, SciLifeLab and UPPMAX should be [acknowledged](https://ngisweden.scilifelab.se/info/faq#how-do-i-acknowledge-ngi-in-my-publication) like so:  
+
+> "The authors would like to acknowledge support from Science for Life Laboratory (SciLifeLab), the National Genomics Infrastructure (NGI), and Uppsala Multidisciplinary Center for Advanced Computational Science (UPPMAX) for providing assistance in massive parallel sequencing and computational infrastructure."
+
+# Support Completion  
+
+You should soon be contacted by one of our managers with a request to close down the project in our internal system and for invoicing matters. If we do not hear from you within 30 days the project will be automatically closed and invoice sent. Again, we would like to remind you about data responsibility and acknowledgements, see sections: **Data Responsibility** and **Acknowledgments**.
+
+You are welcome to come back to us with further data analysis request at any time via http://nbis.se/support/support.html.
+
+Thank you for using NBIS.
+
+<!-- --------------------- Do not edit this and below ---------------------- -->
+
+</br>
+
+```{r,child="assets/_footer-lab.Rmd"}
+```
+
+```{r,eval=FALSE,echo=FALSE}
+# manually run this to render this document to HTML
+rmarkdown::render("nbis-report.Rmd")
+# then run this to convert HTML to PDF (if needed)
+#pagedown::chrome_print("nbis-report.html",output="nbis-report.pdf")
+```
